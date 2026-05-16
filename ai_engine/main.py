@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uuid
 import ast
@@ -6,9 +7,17 @@ from database import supabase
 from services.extraction import extract_startup_profile
 from services.embeddings import generate_embedding
 from master_pipeline import run_matching_pipeline
-from services.match_service import save_match_recommendation
+from services.match_service import save_match_recommendation, approve_match
 
 app = FastAPI(title="EcoSync AI Engine API", description="AI ecosystem linkage engine")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class ExtractRequest(BaseModel):
     profile_text: str
@@ -17,6 +26,9 @@ class RegisterStartupRequest(BaseModel):
     company_name: str
     email: str
     unstructured_profile_text: str
+
+class ApproveMatchRequest(BaseModel):
+    admin_id: str
 
 @app.get("/")
 def read_root():
@@ -113,6 +125,18 @@ async def generate_match_route(startup_id: str):
             "status": "success",
             "message": "AI match generated and saved successfully",
             "data": saved_record
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/matches/approve/{match_id}")
+async def approve_match_route(match_id: str, request: ApproveMatchRequest):
+    try:
+        result = await approve_match(match_id, request.admin_id)
+        return {
+            "status": "success",
+            "message": "Match successfully approved and relationship established",
+            "data": result
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

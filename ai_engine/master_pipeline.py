@@ -1,7 +1,7 @@
-from ai_engine.vector_search import get_top_semantic_matches
-from ai_engine.hybrid_ranker import mock_hgt_inference, calculate_hybrid_score
-from ai_engine.explainability import generate_match_rationale
-from ai_engine.rag_retriever import retrieve_ecosystem_context
+from vector_search import get_top_semantic_matches
+from hybrid_ranker import hgt_graph_inference, calculate_hybrid_score
+from explainability import generate_match_rationale
+from rag_retriever import retrieve_ecosystem_context
 
 async def run_matching_pipeline(startup_data: dict, startup_embedding: list[float]) -> dict:
     """

@@ -1,4 +1,4 @@
-from ai_engine.hgt_model import run_hgt_inference
+from hgt_model import run_hgt_inference
 
 def hgt_graph_inference(model, hetero_data, company_idx: int, mentor_idx: int) -> float:
     """
