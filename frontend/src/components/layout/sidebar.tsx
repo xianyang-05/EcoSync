@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LucideIcon, ChevronLeft, Sparkles } from "lucide-react";
+import { LucideIcon, ChevronLeft, Sparkles, LogOut } from "lucide-react";
 
 export interface NavItem {
   label: string;
@@ -19,33 +19,33 @@ interface SidebarProps {
   roleIcon: LucideIcon;
   collapsed?: boolean;
   onToggle?: () => void;
+  userName?: string;
 }
 
-export function Sidebar({ items, role, roleIcon: RoleIcon, collapsed = false, onToggle }: SidebarProps) {
+export function Sidebar({ items, role, roleIcon: RoleIcon, collapsed = false, onToggle, userName = "User" }: SidebarProps) {
   const pathname = usePathname();
 
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 bottom-0 z-40 flex flex-col border-r border-border bg-surface transition-all duration-300",
+        "fixed left-0 top-0 bottom-0 z-40 flex flex-col border-r border-[#262626] bg-surface transition-all duration-300",
         collapsed ? "w-16" : "w-56"
       )}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 h-14 border-b border-border shrink-0">
+      <div className="flex items-center gap-3 px-4 h-14 border-b border-[#262626] shrink-0">
         <div className="rounded-md bg-primary p-1.5 shrink-0">
           <Sparkles className="h-4 w-4 text-primary-on" />
         </div>
         {!collapsed && (
           <div className="min-w-0">
-            <h1 className="text-sm font-bold text-foreground tracking-tight truncate">Nexus</h1>
-            <p className="text-[10px] font-mono text-muted uppercase tracking-[0.15em]">Ecosystem</p>
+            <h1 className="text-xl font-bold text-foreground tracking-tight truncate">EcoSync</h1>
           </div>
         )}
       </div>
 
       {/* Role indicator */}
-      <div className={cn("px-3 py-3 border-b border-border shrink-0", collapsed && "px-2")}>
+      <div className={cn("px-3 py-3 border-b border-[#262626] shrink-0", collapsed && "px-2")}>
         <div
           className={cn(
             "flex items-center gap-2 rounded-md bg-primary-subtle border border-primary-border/30 px-3 py-2",
@@ -106,8 +106,10 @@ export function Sidebar({ items, role, roleIcon: RoleIcon, collapsed = false, on
         })}
       </nav>
 
-      {/* Collapse toggle */}
-      <div className="border-t border-border px-3 py-3 shrink-0">
+
+
+      {/* Footer / User */}
+      <div className="mt-auto border-t border-[#262626] p-3 shrink-0">
         <button
           onClick={onToggle}
           className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-xs font-mono text-muted hover:text-foreground hover:bg-surface-container transition-colors cursor-pointer"

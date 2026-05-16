@@ -28,9 +28,12 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground tracking-tight">Analytics</h1>
-        <p className="text-xs font-mono text-muted uppercase tracking-wider mt-1">Ecosystem performance metrics</p>
+      {/* Sticky Page Header */}
+      <div className="sticky top-0 z-40 bg-background/90 backdrop-blur-md -mx-6 px-6 pt-6 pb-4 mb-6 -mt-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Analytics</h1>
+          <p className="text-xs font-mono text-muted uppercase tracking-wider mt-1">Ecosystem performance metrics</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

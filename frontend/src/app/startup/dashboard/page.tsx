@@ -14,12 +14,17 @@ import {
 export default function StartupDashboard() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Dashboard</h1>
-          <p className="text-xs font-mono text-muted uppercase tracking-wider mt-1">NovaTech AI - Growth Assistant</p>
+      {/* Sticky Page Header */}
+      <div className="sticky top-0 z-40 bg-background/90 backdrop-blur-md -mx-6 px-6 pt-6 pb-4 mb-6 -mt-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Dashboard</h1>
+            <p className="text-xs font-mono text-muted uppercase tracking-wider mt-1">NovaTech AI - Growth Assistant</p>
+          </div>
+          <div className="flex items-center gap-3 pr-[300px]">
+            <Button variant="primary" size="sm">Update Progress</Button>
+          </div>
         </div>
-        <Button variant="primary" size="sm">Update Progress</Button>
       </div>
 
       <AIInsightPanel

@@ -1,124 +1,332 @@
 "use client";
 
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Filter, Sparkles, Building2, Users, Briefcase, GraduationCap, X, Target, Activity, Share2, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Network, Filter, ZoomIn, ZoomOut, Maximize2, Sparkles,
-  Building2, Users, Briefcase, GraduationCap
-} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
-const nodes = [
-  { id: 1, label: "NovaTech AI", type: "startup" as const, x: 400, y: 250, connections: [5, 6, 9] },
-  { id: 2, label: "GreenLeaf IoT", type: "startup" as const, x: 200, y: 400, connections: [6, 10] },
-  { id: 3, label: "DataForge", type: "startup" as const, x: 600, y: 400, connections: [7, 9] },
-  { id: 4, label: "CloudPeak", type: "startup" as const, x: 350, y: 550, connections: [8, 10] },
-  { id: 5, label: "Dr. Sarah Kim", type: "mentor" as const, x: 550, y: 150, connections: [1] },
-  { id: 6, label: "James Wilson", type: "mentor" as const, x: 150, y: 250, connections: [1, 2] },
-  { id: 7, label: "Priya Sharma", type: "mentor" as const, x: 700, y: 300, connections: [3] },
-  { id: 8, label: "Michael Torres", type: "mentor" as const, x: 500, y: 550, connections: [4] },
-  { id: 9, label: "Vertex Capital", type: "investor" as const, x: 650, y: 200, connections: [1, 3] },
-  { id: 10, label: "Q4 Accelerator", type: "programme" as const, x: 250, y: 550, connections: [2, 4] },
-];
+// Dynamically import the graph component with no SSR to avoid window/canvas errors
+const InteractiveGraph = dynamic(() => import("@/components/ui/interactive-graph"), { ssr: false });
 
-const typeConfig = {
-  startup: { color: "#BFF549", bg: "rgba(191,245,73,0.15)", label: "Startup" },
-  mentor: { color: "#4ade80", bg: "rgba(74,222,128,0.15)", label: "Mentor" },
-  investor: { color: "#fbbf24", bg: "rgba(251,191,36,0.15)", label: "Investor" },
-  programme: { color: "#c7c6c6", bg: "rgba(199,198,198,0.12)", label: "Programme" },
+// Generate rich mock data
+const generateMockData = () => {
+  const nodes: any[] = [];
+  const links: any[] = [];
+  
+  const types = ["startup", "mentor", "investor", "programme"];
+  const typeCounts = { startup: 25, mentor: 15, investor: 10, programme: 4 };
+  
+  // Create Nodes
+  let idCounter = 1;
+  const nodesByType: Record<string, any[]> = { startup: [], mentor: [], investor: [], programme: [] };
+
+  Object.entries(typeCounts).forEach(([type, count]) => {
+    for (let i = 0; i < count; i++) {
+      const node = {
+        id: `node-${idCounter}`,
+        name: `${type.charAt(0).toUpperCase() + type.slice(1)} ${i + 1}`,
+        type,
+        val: type === "programme" ? 25 : type === "investor" ? 18 : type === "mentor" ? 12 : 8,
+        metrics: {
+          engagement: Math.floor(Math.random() * 40 + 60),
+          compatibility: Math.floor(Math.random() * 30 + 70)
+        },
+        desc: `A highly active ${type} in the ecosystem contributing to various innovations.`
+      };
+      nodes.push(node);
+      nodesByType[type].push(node);
+      idCounter++;
+    }
+  });
+
+  // Create Links (Relationships)
+  // Programmes connect to Startups and Mentors
+  nodesByType.programme.forEach(prog => {
+    const connectedStartups = [...nodesByType.startup].sort(() => 0.5 - Math.random()).slice(0, 8);
+    connectedStartups.forEach(s => links.push({ source: prog.id, target: s.id, type: "participant" }));
+    
+    const connectedMentors = [...nodesByType.mentor].sort(() => 0.5 - Math.random()).slice(0, 4);
+    connectedMentors.forEach(m => links.push({ source: prog.id, target: m.id, type: "facilitator" }));
+  });
+
+  // Startups connect to Investors and Mentors
+  nodesByType.startup.forEach(startup => {
+    // 60% chance to have an investor
+    if (Math.random() > 0.4) {
+      const investor = nodesByType.investor[Math.floor(Math.random() * nodesByType.investor.length)];
+      links.push({ source: investor.id, target: startup.id, type: "funding" });
+    }
+    // Connect to 1-2 mentors
+    const mentorCount = Math.floor(Math.random() * 2) + 1;
+    const mentors = [...nodesByType.mentor].sort(() => 0.5 - Math.random()).slice(0, mentorCount);
+    mentors.forEach(m => links.push({ source: m.id, target: startup.id, type: "mentorship" }));
+  });
+
+  return { nodes, links };
 };
 
 export default function EcosystemGraphPage() {
+  const [data, setData] = useState<{nodes: any[], links: any[]}>({ nodes: [], links: [] });
+  const [hoveredNode, setHoveredNode] = useState<any>(null);
+  const [selectedNode, setSelectedNode] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  
+  const [activeTypes, setActiveTypes] = useState<string[]>(["startup", "mentor", "investor", "programme"]);
+
+  const toggleType = (type: string) => {
+    setActiveTypes(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]);
+  };
+
+  useEffect(() => {
+    setData(generateMockData() as any);
+    setMounted(true);
+  }, []);
+
+  const filteredData = useMemo(() => {
+    if (!data.nodes.length) return { nodes: [], links: [] };
+
+    let fNodes = data.nodes.filter(n => activeTypes.includes(n.type));
+    
+    const nodeIds = new Set(fNodes.map(n => n.id));
+    const fLinks = data.links.filter(l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+      return nodeIds.has(sourceId) && nodeIds.has(targetId);
+    });
+
+    return { nodes: fNodes, links: fLinks };
+  }, [data, activeTypes]);
+
+  if (!mounted) return <div className="h-screen w-full bg-black flex items-center justify-center text-primary font-mono text-sm">Loading Ecosystem Core...</div>;
+
+  const getIconForType = (type: string) => {
+    switch (type) {
+      case "startup": return <Building2 className="h-4 w-4 text-[#00e5ff]" />;
+      case "mentor": return <Users className="h-4 w-4 text-[#b388ff]" />;
+      case "investor": return <Briefcase className="h-4 w-4 text-[#ffd54f]" />;
+      case "programme": return <GraduationCap className="h-4 w-4 text-[#69f0ae]" />;
+      default: return <Sparkles className="h-4 w-4" />;
+    }
+  };
+
+  const getConnections = (nodeId: string) => {
+    return data.links.filter((l: any) => l.source.id === nodeId || l.target.id === nodeId || l.source === nodeId || l.target === nodeId).length;
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Ecosystem Graph</h1>
-          <p className="text-xs font-mono text-muted uppercase tracking-wider mt-1">Interactive relationship visualization</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="secondary" size="sm"><Filter className="h-3.5 w-3.5" /> Filter Entities</Button>
-          <Button variant="ai" size="sm"><Sparkles className="h-3.5 w-3.5" /> AI Cluster Analysis</Button>
-        </div>
-      </div>
+    <div className="relative w-full h-[calc(100vh-80px)] -mt-6 -mx-6 overflow-hidden bg-[#050505]">
+      {/* Dynamic Grid Background */}
+      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none" 
+        style={{
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)`,
+          backgroundSize: '40px 40px'
+        }}
+      />
+      
+      {/* Ambient Gradient Glows */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#00e5ff]/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-[#b388ff]/10 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="flex items-center gap-5">
-        {Object.entries(typeConfig).map(([key, config]) => (
-          <div key={key} className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full" style={{ backgroundColor: config.color }} />
-            <span className="text-[10px] font-mono text-muted uppercase tracking-wider">{config.label}</span>
+      {/* Top Navigation Panel */}
+      <motion.div 
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="absolute top-6 left-6 right-6 z-40 flex items-center justify-between"
+      >
+        <div className="bg-black/50 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-6 shadow-2xl shadow-black/50">
+          <div>
+            <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+              <Network className="h-5 w-5 text-primary" /> Nexus Engine
+            </h1>
+            <p className="text-[10px] font-mono text-white/50 uppercase tracking-widest mt-1">Live Entity Topography</p>
           </div>
-        ))}
-        <div className="ml-auto flex items-center gap-1">
-          <Button variant="ghost" size="icon"><ZoomIn className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="icon"><ZoomOut className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="icon"><Maximize2 className="h-4 w-4" /></Button>
+          <div className="h-8 w-px bg-white/10 mx-2" />
+          <div className="relative">
+            <Button 
+              variant="secondary" 
+              className="bg-white/5 hover:bg-white/10 border-white/10 text-white"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
+              <Filter className="h-4 w-4 mr-2" /> Filter Entities
+            </Button>
+            
+            <AnimatePresence>
+              {isDropdownOpen && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute top-full mt-2 left-0 w-48 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 p-2 space-y-1"
+                >
+                  {[
+                    { id: "startup", label: "Startups" },
+                    { id: "mentor", label: "Mentors" },
+                    { id: "investor", label: "Investors" },
+                    { id: "programme", label: "Programmes" }
+                  ].map(t => (
+                    <label key={t.id} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors">
+                      <input 
+                        type="checkbox" 
+                        className="accent-primary w-4 h-4 cursor-pointer"
+                        checked={activeTypes.includes(t.id)}
+                        onChange={() => toggleType(t.id)}
+                      />
+                      <span className="text-sm font-mono text-white/90">{t.label}</span>
+                    </label>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
 
-      <Card className="relative overflow-hidden p-0" style={{ height: "650px" }}>
-        <svg width="100%" height="100%" className="absolute inset-0">
-          <defs>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="4" result="coloredBlur" />
-              <feMerge>
-                <feMergeNode in="coloredBlur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-
-          {nodes.map((node) =>
-            node.connections.map((targetId) => {
-              const target = nodes.find((n) => n.id === targetId);
-              if (!target) return null;
-              return (
-                <line
-                  key={`${node.id}-${targetId}`}
-                  x1={node.x}
-                  y1={node.y}
-                  x2={target.x}
-                  y2={target.y}
-                  stroke="#262626"
-                  strokeWidth="1"
-                  opacity="0.6"
-                />
-              );
-            })
-          )}
-
-          {nodes.map((node) => {
-            const config = typeConfig[node.type];
-            return (
-              <g key={node.id} className="cursor-pointer" filter="url(#glow)">
-                <circle cx={node.x} cy={node.y} r="28" fill={config.bg} stroke={config.color} strokeWidth="1" opacity="0.9" />
-                <circle cx={node.x} cy={node.y} r="8" fill={config.color} opacity="0.9" />
-                <text x={node.x} y={node.y + 45} textAnchor="middle" fill="#888888" fontSize="10" fontFamily="Geist Mono, monospace">
-                  {node.label}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-
-        <div className="absolute bottom-4 left-4 right-4 glass-panel rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              {[
-                { label: "Entities", value: nodes.length },
-                { label: "Connections", value: nodes.reduce((acc, n) => acc + n.connections.length, 0) },
-                { label: "Clusters", value: 3 },
-              ].map((s, i) => (
-                <div key={i}>
-                  <p className="text-[10px] font-mono text-muted uppercase tracking-wider">{s.label}</p>
-                  <p className="text-lg font-bold font-mono text-foreground">{s.value}</p>
-                </div>
-              ))}
+        {/* Legend / Stats */}
+        <div className="bg-black/50 backdrop-blur-xl border border-white/10 rounded-2xl p-3 flex gap-4 shadow-2xl">
+          {[
+            { label: "Startups", color: "bg-[#00e5ff]", count: 25 },
+            { label: "Mentors", color: "bg-[#b388ff]", count: 15 },
+            { label: "Investors", color: "bg-[#ffd54f]", count: 10 },
+            { label: "Programmes", color: "bg-[#69f0ae]", count: 4 },
+          ].map(l => (
+            <div key={l.label} className="flex flex-col items-center px-3">
+              <div className="flex items-center gap-1.5 mb-1">
+                <div className={`w-2 h-2 rounded-full ${l.color} shadow-[0_0_8px_currentColor]`} />
+                <span className="text-[10px] font-mono text-white/60 uppercase tracking-wider">{l.label}</span>
+              </div>
+              <span className="text-sm font-bold text-white">{l.count}</span>
             </div>
-            <Badge variant="ai"><Sparkles className="h-2.5 w-2.5" /> AI Mapped</Badge>
-          </div>
+          ))}
         </div>
-      </Card>
+      </motion.div>
+
+      {/* The Interactive Force Graph */}
+      <div className="absolute inset-0 z-10">
+        <InteractiveGraph 
+          data={filteredData} 
+          onNodeClick={setSelectedNode} 
+          hoveredNode={hoveredNode} 
+          setHoveredNode={setHoveredNode} 
+          selectedNode={selectedNode}
+        />
+      </div>
+
+      {/* Node Detail Side Panel */}
+      <AnimatePresence>
+        {selectedNode && (
+          <motion.div
+            initial={{ x: "100%", opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: "100%", opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="absolute top-6 bottom-6 right-6 w-[400px] bg-black/60 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
+          >
+            {/* Header */}
+            <div className="p-6 border-b border-white/10 relative overflow-hidden">
+              <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${
+                selectedNode.type === 'startup' ? 'from-[#00e5ff] to-transparent' :
+                selectedNode.type === 'mentor' ? 'from-[#b388ff] to-transparent' :
+                selectedNode.type === 'investor' ? 'from-[#ffd54f] to-transparent' :
+                'from-[#69f0ae] to-transparent'
+              }`} />
+              <div className="flex justify-between items-start mb-4 relative z-10">
+                <Badge variant="outline" className="bg-white/5 border-white/10 text-white uppercase font-mono tracking-wider text-[10px]">
+                  {getIconForType(selectedNode.type)} <span className="ml-2">{selectedNode.type}</span>
+                </Badge>
+                <button onClick={() => setSelectedNode(null)} className="text-white/50 hover:text-white transition-colors bg-white/5 rounded-full p-1.5">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <h2 className="text-2xl font-bold text-white tracking-tight relative z-10">{selectedNode.name}</h2>
+              <p className="text-sm text-white/60 mt-2 relative z-10">{selectedNode.desc}</p>
+            </div>
+
+            <div className="p-6 flex-1 overflow-y-auto space-y-6">
+              {/* Metrics Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Share2 className="h-4 w-4 text-white/50" />
+                    <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider">Connections</span>
+                  </div>
+                  <span className="text-2xl font-bold text-white">{getConnections(selectedNode.id)}</span>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Activity className="h-4 w-4 text-white/50" />
+                    <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider">Engagement</span>
+                  </div>
+                  <span className="text-2xl font-bold text-white">{selectedNode.metrics.engagement}%</span>
+                </div>
+              </div>
+
+              {/* AI Insights */}
+              <div className="space-y-3">
+                <h3 className="text-[10px] font-mono text-white/40 uppercase tracking-widest flex items-center gap-2">
+                  <Sparkles className="h-3 w-3" /> System Insights
+                </h3>
+                
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="p-3 rounded-lg border border-primary/20 bg-primary/5 flex items-start gap-3">
+                  <Target className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <p className="text-sm text-white/80 leading-relaxed">High ecosystem gravity detected. Highly compatible with {selectedNode.type === 'startup' ? 'Seed-stage Investors' : 'DeepTech Startups'}.</p>
+                </motion.div>
+                
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="p-3 rounded-lg border border-white/10 bg-white/5 flex items-start gap-3">
+                  <Network className="h-4 w-4 text-white/50 mt-0.5 shrink-0" />
+                  <p className="text-sm text-white/80 leading-relaxed">Directly connected to {Math.max(1, getConnections(selectedNode.id) - 1)} secondary hubs in the ecosystem.</p>
+                </motion.div>
+              </div>
+
+              {/* Progress */}
+              <div className="space-y-3 pt-2 border-t border-white/10">
+                <h3 className="text-[10px] font-mono text-white/40 uppercase tracking-widest flex items-center gap-2">
+                  <Activity className="h-3 w-3" /> Progress & Milestones
+                </h3>
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs text-white/60">Ecosystem Integration</span>
+                    <span className="text-xs font-bold text-primary">78%</span>
+                  </div>
+                  <div className="w-full bg-black/50 rounded-full h-1.5 mb-4 overflow-hidden border border-white/5">
+                    <div className="bg-primary h-1.5 rounded-full" style={{ width: '78%' }} />
+                  </div>
+                  <div className="flex justify-between items-center text-[10px] font-mono text-white/40 uppercase">
+                    <span>Phase 3</span>
+                    <span>Next: Strategic Partnership</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Timeline */}
+              <div className="space-y-3 pt-2 border-t border-white/10 pb-4">
+                <h3 className="text-[10px] font-mono text-white/40 uppercase tracking-widest flex items-center gap-2">
+                  <Sparkles className="h-3 w-3" /> Recent Activity Timeline
+                </h3>
+                <div className="space-y-4 pl-2 ml-1 border-l border-white/10">
+                  {[
+                    { date: "Today", event: "Completed Q3 Mentorship Review" },
+                    { date: "Nov 12", event: "Matched with new Investor Node" },
+                    { date: "Oct 28", event: "Joined DeepTech Accelerator Programme" }
+                  ].map((item, i) => (
+                    <div key={i} className="relative pl-4">
+                      <div className="absolute w-2 h-2 bg-black border border-primary rounded-full -left-[4.5px] top-1" />
+                      <p className="text-[10px] font-mono text-primary uppercase">{item.date}</p>
+                      <p className="text-xs text-white/80 mt-0.5">{item.event}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Action Bar */}
+            <div className="p-4 border-t border-white/10 bg-black/40 backdrop-blur-md">
+              <Button className="w-full bg-white text-black hover:bg-white/90">View Full Profile</Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

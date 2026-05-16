@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Sidebar, NavItem } from "@/components/layout/sidebar";
-import { TopNavbar } from "@/components/layout/top-navbar";
+import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import {
   Shield,
@@ -18,14 +18,9 @@ import {
 
 const adminNav: NavItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { label: "Pending Matches", href: "/admin/pending-matches", icon: GitMerge, badge: "12", ai: true },
-  { label: "Relationships", href: "/admin/relationships", icon: Network },
+  { label: "Relationships", href: "/admin/relationships", icon: GitMerge },
   { label: "Ecosystem Graph", href: "/admin/ecosystem-graph", icon: Network },
-  { label: "Startups", href: "/admin/startups", icon: Building2 },
-  { label: "Mentors", href: "/admin/mentors", icon: Users },
-  { label: "Programmes", href: "/admin/programmes", icon: GraduationCap },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-  { label: "Logs", href: "/admin/automation-logs", icon: ScrollText, ai: true },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -35,24 +30,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-background">
       <Sidebar
         items={adminNav}
-        role="Admin Control"
+        role="Programme Organizer"
         roleIcon={Shield}
         collapsed={collapsed}
         onToggle={() => setCollapsed(!collapsed)}
-      />
-      <TopNavbar
-        title="Ecosystem Orchestration"
-        subtitle="Admin Control Center"
         userName="Alex Chen"
-        userRole="System Admin"
-        sidebarCollapsed={collapsed}
       />
       <main
         className={cn(
-          "pt-14 transition-all duration-300 min-h-screen",
+          "transition-all duration-300 min-h-screen relative",
           collapsed ? "ml-16" : "ml-56"
         )}
       >
+        <div className="fixed top-0 right-0 h-[72px] px-6 flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity z-50">
+          <div className="text-right">
+            <p className="text-xs font-medium text-foreground">Alex Chen</p>
+            <p className="text-[10px] font-mono text-muted uppercase tracking-wider">Programme Organizer</p>
+          </div>
+          <Avatar name="Alex Chen" size="sm" />
+        </div>
         <div className="p-6">{children}</div>
       </main>
     </div>

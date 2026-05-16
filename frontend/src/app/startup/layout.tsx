@@ -2,18 +2,15 @@
 
 import { useState } from "react";
 import { Sidebar, NavItem } from "@/components/layout/sidebar";
-import { TopNavbar } from "@/components/layout/top-navbar";
+import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { Rocket, LayoutDashboard, UserCircle, Sparkles, GraduationCap, Users, DollarSign, Activity } from "lucide-react";
+import { Rocket, LayoutDashboard, UserCircle, Sparkles, GraduationCap, Users, DollarSign, Activity, Building2 } from "lucide-react";
 
 const startupNav: NavItem[] = [
   { label: "Dashboard", href: "/startup/dashboard", icon: LayoutDashboard },
-  { label: "My Profile", href: "/startup/profile", icon: UserCircle },
-  { label: "Recommendations", href: "/startup/recommendations", icon: Sparkles, ai: true },
-  { label: "Programmes", href: "/startup/programmes", icon: GraduationCap },
-  { label: "Mentors", href: "/startup/mentors", icon: Users },
-  { label: "Funding", href: "/startup/funding", icon: DollarSign, ai: true },
-  { label: "Activity", href: "/startup/activity", icon: Activity },
+  { label: "My Matches", href: "/startup/matches", icon: Users },
+  { label: "AI Matcher", href: "/startup/matcher", icon: Sparkles, ai: true },
+  { label: "History", href: "/startup/history", icon: UserCircle, ai: true },
 ];
 
 export default function StartupLayout({ children }: { children: React.ReactNode }) {
@@ -21,9 +18,15 @@ export default function StartupLayout({ children }: { children: React.ReactNode 
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar items={startupNav} role="Startup" roleIcon={Rocket} collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
-      <TopNavbar title="Growth Assistant" subtitle="Startup Portal" userName="Jordan Lee" userRole="CEO, NovaTech AI" sidebarCollapsed={collapsed} />
-      <main className={cn("pt-14 transition-all duration-300 min-h-screen", collapsed ? "ml-16" : "ml-56")}>
+      <Sidebar items={startupNav} role="Startup" roleIcon={Rocket} collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} userName="Jordan Lee" />
+      <main className={cn("transition-all duration-300 min-h-screen relative", collapsed ? "ml-16" : "ml-56")}>
+        <div className="fixed top-0 right-0 h-[72px] px-6 flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity z-50">
+          <div className="text-right">
+            <p className="text-xs font-medium text-foreground">Jordan Lee</p>
+            <p className="text-[10px] font-mono text-muted uppercase tracking-wider">CEO, NovaTech AI</p>
+          </div>
+          <Avatar name="Jordan Lee" size="sm" />
+        </div>
         <div className="p-6">{children}</div>
       </main>
     </div>

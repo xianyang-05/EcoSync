@@ -11,10 +11,10 @@ import {
   ArrowUpRight, MessageSquare, Sparkles
 } from "lucide-react";
 
-const activeStartups = [
-  { name: "NovaTech AI", domain: "AI / NLP", nextSession: "Tomorrow, 2pm", health: 92, status: "on-track" },
-  { name: "DataForge", domain: "Data Analytics", nextSession: "Thu, 10am", health: 88, status: "on-track" },
-  { name: "BioSynth Labs", domain: "BioTech", nextSession: "Next Week", health: 75, status: "needs-attention" },
+const aiInsights = [
+  { startup: "NovaTech AI", insight: "Ready for Series A preparation. Review their updated architecture.", priority: "High" },
+  { startup: "DataForge", insight: "GTM strategy needs refinement for Q3 launch.", priority: "Medium" },
+  { startup: "BioSynth Labs", insight: "Runway analysis shows burn rate is high. Advise on extending.", priority: "High" },
 ];
 
 const upcomingSessions = [
@@ -26,12 +26,17 @@ const upcomingSessions = [
 export default function MentorDashboard() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Mentor Hub</h1>
-          <p className="text-xs font-mono text-muted uppercase tracking-wider mt-1">Overview of your mentoring activities</p>
+      {/* Sticky Page Header */}
+      <div className="sticky top-0 z-40 bg-background/90 backdrop-blur-md -mx-6 px-6 pt-6 pb-4 mb-6 -mt-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Mentor Hub</h1>
+            <p className="text-xs font-mono text-muted uppercase tracking-wider mt-1">Overview of your mentoring activities</p>
+          </div>
+          <div className="flex items-center gap-3 mr-48">
+            <Button variant="primary" size="sm"><Calendar className="h-3.5 w-3.5" /> Manage Schedule</Button>
+          </div>
         </div>
-        <Button variant="primary" size="sm"><Calendar className="h-3.5 w-3.5" /> Manage Schedule</Button>
       </div>
 
       <AIInsightPanel
@@ -50,28 +55,22 @@ export default function MentorDashboard() {
       <div className="grid lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>My Startups</CardTitle>
+            <CardTitle className="flex items-center gap-2"><Brain className="h-4 w-4 text-primary" /> AI Insights</CardTitle>
             <Button variant="ghost" size="sm">View All <ArrowUpRight className="h-3 w-3" /></Button>
           </CardHeader>
           <div className="space-y-3">
-            {activeStartups.map((startup, i) => (
-              <div key={i} className="flex items-center justify-between p-3 rounded-md border border-border hover:bg-surface-container transition-colors">
-                <div className="flex items-center gap-3">
-                  <Avatar name={startup.name} size="sm" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{startup.name}</p>
-                    <p className="text-[10px] font-mono text-muted uppercase tracking-wider">{startup.domain}</p>
-                  </div>
+            {aiInsights.map((item, i) => (
+              <div key={i} className="flex items-start gap-3 p-3 rounded-md border border-border hover:bg-surface-container transition-colors">
+                <div className="mt-1">
+                  <Avatar name={item.startup} size="sm" />
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right hidden sm:block">
-                    <p className="text-xs text-foreground">{startup.nextSession}</p>
-                    <p className="text-[10px] font-mono text-muted uppercase tracking-wider">Next Session</p>
-                  </div>
-                  <Badge variant={startup.status === "on-track" ? "success" : "warning"}>
-                    {startup.status === "on-track" ? "On Track" : "Attention"}
-                  </Badge>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">{item.startup}</p>
+                  <p className="text-xs text-muted mt-1 leading-relaxed">{item.insight}</p>
                 </div>
+                <Badge variant={item.priority === "High" ? "danger" : "warning"}>
+                  {item.priority}
+                </Badge>
               </div>
             ))}
           </div>
@@ -92,7 +91,7 @@ export default function MentorDashboard() {
                   <p className="text-sm font-medium text-foreground">{session.startup}</p>
                   <p className="text-[10px] font-mono text-muted uppercase tracking-wider">{session.type} · {session.duration}</p>
                 </div>
-                <Button variant={session.action === "Join" ? "primary" : "secondary"} size="sm">
+                <Button variant="primary" size="sm">
                   {session.action}
                 </Button>
               </div>
