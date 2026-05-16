@@ -40,4 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /dataset
-credentials.json
+credentials.jsonvenv/
+ai_engine/venv/
+__pycache__/
+.env
