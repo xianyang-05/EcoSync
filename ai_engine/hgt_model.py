@@ -42,14 +42,21 @@ class LinkPredictionHGT(nn.Module):
         # Step A: Project Node Attributes
         h_dict = {}
         for node_type, x in x_dict.items():
-            h_dict[node_type] = F.relu(self.lin_dict[node_type](x))
+            if node_type in self.lin_dict:
+                h_dict[node_type] = F.relu(self.lin_dict[node_type](x))
+            else:
+                raise KeyError(f"Node type '{node_type}' not found in HGT linear projection dict. Expected one of: {list(self.lin_dict.keys())}")
             
         # Step B: Graph Message Passing
-        # HGT naturally handles sparse structural connections and varying node types
         h_dict = self.conv(h_dict, edge_index_dict)
         
         # Step C: Edge Prediction
-        # Retrieve the updated context-aware graph representations for the two specific nodes
+        # Ensure safe access
+        if 'company' not in h_dict:
+            raise KeyError(f"'company' missing from computed graph state! Available: {list(h_dict.keys())}")
+        if 'mentor' not in h_dict:
+            raise KeyError(f"'mentor' missing from computed graph state! Available: {list(h_dict.keys())}")
+            
         company_emb = h_dict['company'][company_idx]
         mentor_emb = h_dict['mentor'][mentor_idx]
         

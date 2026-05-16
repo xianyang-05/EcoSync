@@ -176,6 +176,13 @@ def build_ecosystem_graph(companies: list[dict], mentors: list[dict], df_edges: 
     data['company', 'mentored_by', 'mentor'].edge_index = edge_index_tensor
     
     # Form the edge_attr tensor. Shape must be [num_edges, num_features]
-    data['company', 'mentored_by', 'mentor'].edge_attr = torch.tensor(edge_features, dtype=torch.float)
+    edge_attr_tensor = torch.tensor(edge_features, dtype=torch.float)
+    data['company', 'mentored_by', 'mentor'].edge_attr = edge_attr_tensor
+
+    # Add reverse edges so both 'company' and 'mentor' appear as target nodes
+    # This prevents HGTConv from dropping 'company' out of the graph state forward pass!
+    rev_edge_index = torch.tensor([target_indices, source_indices], dtype=torch.long)
+    data['mentor', 'mentors', 'company'].edge_index = rev_edge_index
+    data['mentor', 'mentors', 'company'].edge_attr = edge_attr_tensor
     
     return data, company_id_to_idx, mentor_id_to_idx
