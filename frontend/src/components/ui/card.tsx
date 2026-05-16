@@ -1,13 +1,12 @@
 import { cn } from "@/lib/utils";
 
-interface CardProps {
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  className?: string;
   hover?: boolean;
   ai?: boolean;
 }
 
-export function Card({ children, className, hover, ai }: CardProps) {
+export function Card({ children, className, hover, ai, ...props }: CardProps) {
   return (
     <div
       className={cn(
@@ -16,6 +15,7 @@ export function Card({ children, className, hover, ai }: CardProps) {
         ai && "ai-glow ai-shimmer",
         className
       )}
+      {...props}
     >
       {children}
     </div>

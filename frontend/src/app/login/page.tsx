@@ -77,16 +77,18 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-6 group/cards">
           {roles.map((role) => (
             <Link
               key={role.id}
               href={role.href}
               className={cn(
-                "group relative rounded-lg border border-border bg-surface-card p-6",
+                "group relative flex flex-col rounded-lg border border-border bg-surface-card p-6",
                 "border-t-2",
                 role.accentBorder,
-                "transition-all duration-300 hover:border-surface-variant hover:bg-card-hover"
+                "transition-all duration-500",
+                "group-hover/cards:scale-[0.98] group-hover/cards:opacity-50",
+                "hover:!scale-105 hover:!opacity-100 hover:shadow-[0_0_40px_rgba(191,245,73,0.25)] hover:border-primary/50 hover:bg-surface-container hover:z-10"
               )}
             >
               {/* Icon */}
@@ -112,7 +114,7 @@ export default function LoginPage() {
               </div>
 
               {/* CTA */}
-              <div className="flex items-center gap-2 text-sm font-semibold text-primary group-hover:gap-3 transition-all">
+              <div className="mt-auto flex items-center gap-2 text-sm font-semibold text-primary group-hover:gap-3 transition-all">
                 <span>{role.cta}</span>
                 <ArrowRight className="h-4 w-4" />
               </div>
