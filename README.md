@@ -4,6 +4,64 @@
 
 ---
 
+## Setup & Run
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-username/ecosystem-os.git
+cd ecosystem-os
+```
+
+### 2. Configure environment variables
+
+Create a `.env` file in the project root:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
+```
+
+### 3. Set up the database
+
+Run the schema in your Supabase SQL Editor:
+
+```sql
+-- Enable pgvector extension for 384d embeddings
+CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Then run the contents of test.sql to create all tables
+```
+
+### 4. Start the Backend (AI Engine)
+
+```bash
+cd ai_engine
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
+```
+
+The API server will start at `http://127.0.0.1:8000`. Verify with:
+
+```bash
+curl http://127.0.0.1:8000/health
+# Expected: {"status":"healthy","database":"connected"}
+```
+
+### 5. Start the Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The application will be available at `http://localhost:3000`.
+
+---
+
 ## Architecture Overview
 
 EcoSync follows a **5-stage AI pipeline** architecture that transforms messy, unstructured startup and mentor profiles into high-confidence, explainable match recommendations.
@@ -152,64 +210,6 @@ ecosystem-os/
 - A **Supabase** project with `pgvector` extension enabled
 - A **Google Cloud / AI Studio** API key for Gemini
 - A **Firebase** project with Authentication enabled
-
----
-
-## Setup & Run
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/your-username/ecosystem-os.git
-cd ecosystem-os
-```
-
-### 2. Configure environment variables
-
-Create a `.env` file in the project root:
-
-```env
-GEMINI_API_KEY=your_gemini_api_key_here
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
-```
-
-### 3. Set up the database
-
-Run the schema in your Supabase SQL Editor:
-
-```sql
--- Enable pgvector extension for 384d embeddings
-CREATE EXTENSION IF NOT EXISTS vector;
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
--- Then run the contents of test.sql to create all tables
-```
-
-### 4. Start the Backend (AI Engine)
-
-```bash
-cd ai_engine
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-```
-
-The API server will start at `http://127.0.0.1:8000`. Verify with:
-
-```bash
-curl http://127.0.0.1:8000/health
-# Expected: {"status":"healthy","database":"connected"}
-```
-
-### 5. Start the Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-The application will be available at `http://localhost:3000`.
 
 ---
 
