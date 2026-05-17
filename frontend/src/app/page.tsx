@@ -4,7 +4,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="text-center">
-        <h1 className="text-4xl font-bold gradient-text mb-4">Nexus Ecosystem</h1>
+        <h1 className="text-4xl font-bold gradient-text mb-4">EcoSync</h1>
         <p className="text-muted font-mono text-sm mb-8 uppercase tracking-wider">AI Orchestration Engine</p>
         <Link
           href="/login"

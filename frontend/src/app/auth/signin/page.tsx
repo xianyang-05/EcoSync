@@ -119,7 +119,7 @@ function SignInContent() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-foreground tracking-tight">
-              Nexus Ecosystem
+              EcoSync
             </h1>
             <p className="text-[10px] font-mono text-muted uppercase tracking-[0.15em]">
               Orchestration Engine
@@ -197,7 +197,7 @@ function SignInContent() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="operator@nexus.dev"
+                    placeholder="operator@ecosync.dev"
                     required
                     className="w-full rounded-md border border-border bg-surface-container pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-light focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all"
                   />

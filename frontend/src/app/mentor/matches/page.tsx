@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { Users, Search, Filter, ArrowUpRight, Clock, Target, Calendar, X, Activity, Sparkles, Network } from "lucide-react";
-import { useState } from "react";
+import { Users, Search, Filter, ArrowUpRight, Clock, Target, Calendar, X, Activity, Sparkles, Network, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const matches = [
@@ -57,6 +57,20 @@ const matches = [
 export default function MentorMatchesPage() {
   const [activeTab, setActiveTab] = useState("All");
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
+  const [isAiMatcherOpen, setIsAiMatcherOpen] = useState(false);
+  const [isMatching, setIsMatching] = useState(false);
+
+  useEffect(() => {
+    // Simulate finding a new match
+    const timer = setTimeout(() => {
+      setIsAiMatcherOpen(true);
+      setIsMatching(true);
+      setTimeout(() => {
+        setIsMatching(false);
+      }, 2000);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const displayData = matches.filter(m => activeTab === "All" || m.status === activeTab);
 
@@ -262,6 +276,134 @@ export default function MentorMatchesPage() {
         </motion.div>
         </div>
       )}
+      </AnimatePresence>
+
+      {/* AI Matcher Modal */}
+      <AnimatePresence>
+        {isAiMatcherOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+              onClick={() => !isMatching && setIsAiMatcherOpen(false)}
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-md bg-surface border border-border rounded-xl shadow-2xl overflow-hidden flex flex-col"
+            >
+              <div className="p-6 border-b border-border bg-surface-container flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground">Ecosystem Matcher</h2>
+                    <p className="text-sm text-muted">New connection found</p>
+                  </div>
+                </div>
+                {!isMatching && (
+                  <button onClick={() => setIsAiMatcherOpen(false)} className="text-muted hover:text-foreground transition-colors">
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
+
+              <div className="p-6 bg-background relative min-h-[300px] flex flex-col justify-center">
+                {isMatching ? (
+                  <div className="flex flex-col items-center justify-center space-y-4 py-8">
+                    <div className="relative">
+                      <div className="h-16 w-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Sparkles className="h-6 w-6 text-primary animate-pulse" />
+                      </div>
+                    </div>
+                    <div className="space-y-1 text-center">
+                      <p className="text-sm font-medium text-foreground">Computing vector embeddings...</p>
+                      <p className="text-xs text-muted">Analyzing startup profiles against your expertise</p>
+                    </div>
+                  </div>
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-6"
+                  >
+                    <div className="flex items-center justify-center">
+                      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <CheckCircle2 className="h-4 w-4" />
+                        <span className="text-sm font-medium">Startup Match Found!</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-6">
+                      <div className="text-center space-y-2">
+                        <div className="w-16 h-16 rounded-full bg-surface-container border border-border flex items-center justify-center mx-auto overflow-hidden">
+                          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=James" alt="Mentor" className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-foreground">James Wilson</p>
+                          <p className="text-xs text-muted">You (Mentor)</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex-1 flex items-center justify-center">
+                        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-primary/50 to-transparent relative">
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2">
+                            <Activity className="h-4 w-4 text-primary" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-center space-y-2">
+                        <div className="w-16 h-16 rounded-full bg-surface-container border border-border flex items-center justify-center mx-auto overflow-hidden p-3">
+                           <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 rounded-md shadow-inner" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-foreground">NovaTech AI</p>
+                          <p className="text-xs text-muted">Startup</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-surface-container/50 border border-border rounded-lg p-4 space-y-3">
+                      <p className="text-xs font-bold text-muted uppercase tracking-wider mb-2">Match Synergy Points</p>
+                      <ul className="space-y-3">
+                        <li className="flex items-start gap-2 text-sm text-foreground/80">
+                          <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>Shared domain: <strong className="text-foreground">FinTech + AI</strong></span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm text-foreground/80">
+                          <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>You previously advised similar startup with <strong className="text-emerald-400">+32% growth</strong></span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm text-foreground/80">
+                          <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>Startup stage aligns with your expertise</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm text-foreground/80">
+                          <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>High semantic similarity score: <strong className="text-primary">0.91</strong></span>
+                        </li>
+                      </ul>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+              
+              {!isMatching && (
+                <div className="p-4 border-t border-border bg-surface-container flex justify-end gap-3">
+                  <Button variant="ghost" onClick={() => setIsAiMatcherOpen(false)}>Dismiss</Button>
+                  <Button variant="primary" onClick={() => { setIsAiMatcherOpen(false); }}>
+                    Connect
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
     </div>
   );

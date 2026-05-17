@@ -5,12 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { Search, Filter, ArrowUpRight, Network, X, Activity, Sparkles, Share2, Target, Calendar } from "lucide-react";
-import { useState } from "react";
+import { Search, Filter, ArrowUpRight, Network, X, Activity, Sparkles, Share2, Target, Calendar, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const myRelationships = [
-  { partner: "Dr. Sarah Kim", type: "Mentor", health: 92, sessions: 12, lastActive: "2 days ago", status: "active", trend: "up" },
+  { partner: "James Wilson", type: "Mentor", health: 92, sessions: 12, lastActive: "2 days ago", status: "active", trend: "up" },
   { partner: "Vertex Capital", type: "Investor", health: 95, sessions: 5, lastActive: "1 day ago", status: "active", trend: "up" },
   { partner: "Q4 DeepTech", type: "Programme", health: 88, sessions: 15, lastActive: "3 days ago", status: "active", trend: "up" },
   { partner: "Prof. Tanaka", type: "Mentor", health: 91, sessions: 10, lastActive: "1 day ago", status: "active", trend: "up" },
@@ -19,6 +19,20 @@ const myRelationships = [
 export default function StartupRelationshipsPage() {
   const [activeTab, setActiveTab] = useState("All");
   const [selectedRelationship, setSelectedRelationship] = useState<any>(null);
+  const [isAiMatcherOpen, setIsAiMatcherOpen] = useState(false);
+  const [isMatching, setIsMatching] = useState(false);
+
+  useEffect(() => {
+    // Simulate finding a new match
+    const timer = setTimeout(() => {
+      setIsAiMatcherOpen(true);
+      setIsMatching(true);
+      setTimeout(() => {
+        setIsMatching(false);
+      }, 2000);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const displayData = myRelationships
     .filter(r => 
@@ -31,7 +45,7 @@ export default function StartupRelationshipsPage() {
       <div className="sticky top-0 z-40 bg-background/90 backdrop-blur-md -mx-6 px-6 pt-6 mb-6 -mt-6">
         <div className="flex items-center justify-between pb-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">My Relationships</h1>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">My Matches</h1>
             <p className="text-xs font-mono text-muted uppercase tracking-wider mt-1">Manage your connections and network health</p>
           </div>
           <div className="flex items-center gap-3 mr-48">
@@ -204,6 +218,134 @@ export default function StartupRelationshipsPage() {
           </motion.div>
         </div>
       )}
+      </AnimatePresence>
+
+      {/* AI Matcher Modal */}
+      <AnimatePresence>
+        {isAiMatcherOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+              onClick={() => !isMatching && setIsAiMatcherOpen(false)}
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-md bg-surface border border-border rounded-xl shadow-2xl overflow-hidden flex flex-col"
+            >
+              <div className="p-6 border-b border-border bg-surface-container flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground">Ecosystem Matcher</h2>
+                    <p className="text-sm text-muted">New connection found</p>
+                  </div>
+                </div>
+                {!isMatching && (
+                  <button onClick={() => setIsAiMatcherOpen(false)} className="text-muted hover:text-foreground transition-colors">
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
+
+              <div className="p-6 bg-background relative min-h-[300px] flex flex-col justify-center">
+                {isMatching ? (
+                  <div className="flex flex-col items-center justify-center space-y-4 py-8">
+                    <div className="relative">
+                      <div className="h-16 w-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Sparkles className="h-6 w-6 text-primary animate-pulse" />
+                      </div>
+                    </div>
+                    <div className="space-y-1 text-center">
+                      <p className="text-sm font-medium text-foreground">Computing vector embeddings...</p>
+                      <p className="text-xs text-muted">Analyzing mentor profiles against your needs</p>
+                    </div>
+                  </div>
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-6"
+                  >
+                    <div className="flex items-center justify-center">
+                      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <CheckCircle2 className="h-4 w-4" />
+                        <span className="text-sm font-medium">Mentor Match Found!</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-6">
+                      <div className="text-center space-y-2">
+                        <div className="w-16 h-16 rounded-full bg-surface-container border border-border flex items-center justify-center mx-auto overflow-hidden p-3">
+                           <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 rounded-md shadow-inner" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-foreground">NovaTech AI</p>
+                          <p className="text-xs text-muted">You (Startup)</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex-1 flex items-center justify-center">
+                        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-primary/50 to-transparent relative">
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2">
+                            <Activity className="h-4 w-4 text-primary" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-center space-y-2">
+                        <div className="w-16 h-16 rounded-full bg-surface-container border border-border flex items-center justify-center mx-auto overflow-hidden">
+                          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=James" alt="Mentor" className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-foreground">James Wilson</p>
+                          <p className="text-xs text-muted">Mentor</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-surface-container/50 border border-border rounded-lg p-4 space-y-3">
+                      <p className="text-xs font-bold text-muted uppercase tracking-wider mb-2">Match Synergy Points</p>
+                      <ul className="space-y-3">
+                        <li className="flex items-start gap-2 text-sm text-foreground/80">
+                          <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>Shared domain: <strong className="text-foreground">FinTech + AI</strong></span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm text-foreground/80">
+                          <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>Mentor previously advised similar startup with <strong className="text-emerald-400">+32% growth</strong></span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm text-foreground/80">
+                          <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>Your stage aligns with mentor expertise</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm text-foreground/80">
+                          <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>High semantic similarity score: <strong className="text-primary">0.91</strong></span>
+                        </li>
+                      </ul>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+              
+              {!isMatching && (
+                <div className="p-4 border-t border-border bg-surface-container flex justify-end gap-3">
+                  <Button variant="ghost" onClick={() => setIsAiMatcherOpen(false)}>Dismiss</Button>
+                  <Button variant="primary" onClick={() => { setIsAiMatcherOpen(false); }}>
+                    Connect
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
     </div>
   );

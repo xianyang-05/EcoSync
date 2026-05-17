@@ -139,7 +139,7 @@ export default function EcosystemGraphPage() {
         <div className="bg-black/50 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-6 shadow-2xl shadow-black/50">
           <div>
             <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              <Network className="h-5 w-5 text-primary" /> Nexus Engine
+              <Network className="h-5 w-5 text-primary" /> EcoSync Engine
             </h1>
             <p className="text-[10px] font-mono text-white/50 uppercase tracking-widest mt-1">Live Entity Topography</p>
           </div>

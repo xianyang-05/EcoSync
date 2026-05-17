@@ -14,7 +14,7 @@ const roles = [
     href: "/auth/signin?role=admin",
     accentBorder: "border-t-primary",
     cta: "Initialize Subsystem",
-    features: ["Match Approvals", "Ecosystem Graph", "Automation Logs", "Analytics"],
+    features: ["Programmes Management", "Ecosystem Graph", "Active Relationships", "Ecosystem Analytics"],
   },
   {
     id: "mentor",
@@ -25,7 +25,7 @@ const roles = [
     href: "/auth/signin?role=mentor",
     accentBorder: "border-t-success",
     cta: "Enter Hub",
-    features: ["AI Recommendations", "Session Management", "Startup Insights", "Impact Metrics"],
+    features: ["My Matches & Portfolio", "Meeting History Logs", "Startup Growth Insights", "AI Recommendations"],
   },
   {
     id: "startup",
@@ -36,7 +36,7 @@ const roles = [
     href: "/auth/signin?role=startup",
     accentBorder: "border-t-warning",
     cta: "Launch Dashboard",
-    features: ["Growth Pathway", "Mentor Matching", "Funding Radar", "AI Coach"],
+    features: ["Interactive Dashboard", "Active Matches Feed", "AI Matcher & Insights", "Meeting Logs & History"],
   },
 ];
 
@@ -50,7 +50,7 @@ export default function LoginPage() {
             <Sparkles className="h-5 w-5 text-primary-on" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-foreground tracking-tight">Nexus Ecosystem</h1>
+            <h1 className="text-lg font-bold text-foreground tracking-tight">EcoSync</h1>
             <p className="text-[10px] font-mono text-muted uppercase tracking-[0.15em]">
               Orchestration Engine
             </p>
@@ -70,10 +70,10 @@ export default function LoginPage() {
             <span className="text-xs font-mono font-semibold text-primary uppercase tracking-wider">AI-Powered Platform</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-3">
-            Select Your Interface
+            Select Your Role
           </h2>
           <p className="text-base text-muted max-w-lg mx-auto leading-relaxed">
-            Choose your access level to enter the Nexus Ecosystem. Each portal is optimized for specific roles and capabilities.
+            Choose your access level to enter the EcoSync Ecosystem. Each portal is optimized for specific roles and capabilities.
           </p>
         </div>
 

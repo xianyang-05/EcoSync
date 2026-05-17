@@ -190,7 +190,7 @@ function SignUpContent() {
         <div className="flex items-center gap-3">
           <div className="rounded-md bg-primary p-2"><Sparkles className="h-5 w-5 text-primary-on" /></div>
           <div>
-            <h1 className="text-lg font-bold text-foreground tracking-tight">Nexus Ecosystem</h1>
+            <h1 className="text-lg font-bold text-foreground tracking-tight">EcoSync</h1>
             <p className="text-[10px] font-mono text-muted uppercase tracking-[0.15em]">Orchestration Engine</p>
           </div>
         </div>
@@ -211,7 +211,7 @@ function SignUpContent() {
               <span className={cn("text-xs font-mono font-semibold uppercase tracking-wider", config.accentClass)}>{config.label} · {config.subtitle}</span>
             </div>
             <h2 className="text-3xl font-bold text-foreground tracking-tight mb-2">Create Account</h2>
-            <p className="text-sm text-muted">Register as {role === "admin" ? "an" : "a"} {config.label} in the Nexus Ecosystem</p>
+            <p className="text-sm text-muted">Register as {role === "admin" ? "an" : "a"} {config.label} in the EcoSync Ecosystem</p>
           </div>
 
           {/* Step indicator */}
@@ -235,7 +235,7 @@ function SignUpContent() {
             <form onSubmit={handleSubmit}>
               {step === 1 ? (
                 <div className="space-y-5">
-                  <InputField id="signup-email" label="Email Address" icon={Mail} type="email" value={email} onChange={setEmail} placeholder="operator@nexus.dev" />
+                  <InputField id="signup-email" label="Email Address" icon={Mail} type="email" value={email} onChange={setEmail} placeholder="operator@ecosync.dev" />
                   <div className="space-y-2">
                     <label htmlFor="signup-password" className="text-xs font-mono font-medium text-muted uppercase tracking-wider">Password</label>
                     <div className="relative">

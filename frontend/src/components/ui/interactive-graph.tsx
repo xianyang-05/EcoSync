@@ -107,21 +107,64 @@ export default function InteractiveGraph({ data, onNodeClick, hoveredNode, setHo
     ctx.stroke();
 
     // Text Label
-    if (!isMuted && globalScale > 1.5) {
+    const isSelected = selectedNode?.id === node.id;
+    const isActuallyHovered = hoveredNode?.id === node.id;
+    const hasActiveSelection = !!(hoveredNode || selectedNode);
+    const shouldShowLabel = (hasActiveSelection && isHighlighted) || (!hasActiveSelection && globalScale > 1.5);
+
+    if (shouldShowLabel) {
       const label = node.name;
-      const fontSize = 12 / globalScale;
-      ctx.font = `${isHovered ? 'bold ' : ''}${fontSize}px Inter, sans-serif`;
+      
+      let baseFontSize = 12;
+      let isImportant = false;
+      
+      if (isSelected || isActuallyHovered) {
+        baseFontSize = 14;
+        isImportant = true;
+      } else if (hasActiveSelection && isHighlighted) {
+        baseFontSize = 13;
+        isImportant = true; // highlight connection labels with bold weight
+      }
+      
+      const fontSize = baseFontSize / globalScale;
+      ctx.font = `${isImportant ? '600 ' : ''}${fontSize}px Inter, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
       // text background
       const textWidth = ctx.measureText(label).width;
-      const bckgDimensions = [textWidth + 4/globalScale, fontSize + 4/globalScale];
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y + size + 2/globalScale, bckgDimensions[0], bckgDimensions[1]);
+      const bckgDimensions = [textWidth + 8/globalScale, fontSize + 6/globalScale];
       
-      ctx.fillStyle = isHovered ? '#ffffff' : '#aaaaaa';
-      ctx.fillText(label, node.x, node.y + size + 2/globalScale + bckgDimensions[1]/2);
+      const rx = node.x - bckgDimensions[0] / 2;
+      const ry = node.y + size + 4/globalScale;
+      const rw = bckgDimensions[0];
+      const rh = bckgDimensions[1];
+      const radius = 4 / globalScale;
+      
+      ctx.fillStyle = 'rgba(5, 5, 5, 0.9)';
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(rx, ry, rw, rh, radius);
+      } else {
+        ctx.rect(rx, ry, rw, rh);
+      }
+      ctx.fill();
+      
+      // Draw thin border for active/highlighted labels
+      ctx.lineWidth = (isImportant ? 1.5 : 1) / globalScale;
+      if (isSelected) {
+        ctx.strokeStyle = '#00e5ff';
+        ctx.stroke();
+      } else if (isActuallyHovered) {
+        ctx.strokeStyle = baseColor;
+        ctx.stroke();
+      } else if (hasActiveSelection && isHighlighted) {
+        ctx.strokeStyle = `${baseColor}99`; // semi-transparent category color border
+        ctx.stroke();
+      }
+      
+      ctx.fillStyle = isImportant ? '#ffffff' : '#cccccc';
+      ctx.fillText(label, node.x, node.y + size + 4/globalScale + rh/2);
     }
   }, [hoveredNode, selectedNode, highlightNodes]);
 

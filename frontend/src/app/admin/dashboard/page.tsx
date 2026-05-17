@@ -33,48 +33,55 @@ const automationEvents = [
 
 export default function AdminDashboard() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isAiMatcherOpen, setIsAiMatcherOpen] = useState(false);
+  const [isMatching, setIsMatching] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isAutoFilled, setIsAutoFilled] = useState(false);
   
   const [formData, setFormData] = useState({
-    name: "", type: "", industry: "", stage: "", organizer: "", country: "", city: "",
+    name: "", type: "", industry: "", stage: "", organizer: "", city: "",
     organizer_email: "", organizer_website: "", description: "", objective: "",
     eligibility_criteria: "", benefits: "", application_open_date: "", application_deadline: "",
     programme_start_date: "", programme_end_date: "", venue: "", max_participants: "",
     funding_amount: "", website_url: "", application_url: ""
   });
 
-  const handleAutoFill = () => {
+  const handleAutoFill = async () => {
     setIsGenerating(true);
-    // Simulate AI API delay
-    setTimeout(() => {
-      setFormData(prev => ({
-        name: prev.name || "Global DeepTech Vanguard 2027",
-        type: prev.type || "Accelerator",
-        industry: prev.industry || "Artificial Intelligence",
-        stage: prev.stage || "Seed",
-        organizer: prev.organizer || "EcoSync Foundation",
-        country: prev.country || "United States",
-        city: prev.city || "San Francisco",
-        organizer_email: prev.organizer_email || "partnerships@ecosync.org",
-        organizer_website: prev.organizer_website || "https://ecosync.org",
-        description: prev.description || "A 12-week intensive accelerator designed to propel elite AI startups from prototype to Series A readiness.",
-        objective: prev.objective || "Accelerate go-to-market strategies for deep tech companies.",
-        eligibility_criteria: prev.eligibility_criteria || "Must have a working MVP, raised pre-seed, and have at least 2 full-time founders.",
-        benefits: prev.benefits || "$100k investment, 1-on-1 mentorship, co-working space, and $50k in cloud credits.",
-        application_open_date: prev.application_open_date || "2027-01-01",
-        application_deadline: prev.application_deadline || "2027-02-15",
-        programme_start_date: prev.programme_start_date || "2027-03-01",
-        programme_end_date: prev.programme_end_date || "2027-05-30",
-        venue: prev.venue || "EcoSync Innovation Hub, SF",
-        max_participants: prev.max_participants || "15",
-        funding_amount: prev.funding_amount || "100000",
-        website_url: prev.website_url || "https://ecosync.org/vanguard",
-        application_url: prev.application_url || "https://ecosync.org/apply",
-      }));
-      setIsAutoFilled(true);
-      setIsGenerating(false);
-    }, 1500);
+    // Simulate a brief premium loading transition of 600ms for realistic AI feeling
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    const orgSlug = (formData.organizer || "ecosync").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const progSlug = (formData.name || "cohort").toLowerCase().replace(/[^a-z0-9]/g, "-");
+    const industryName = formData.industry || "Technology";
+    const cityName = formData.city || "Silicon Valley";
+    const stageName = formData.stage || "Early-stage";
+    const typeName = formData.type || "Accelerator";
+
+    const mockGenerated = {
+      organizer_email: `contact@${orgSlug}.com`,
+      organizer_website: `https://www.${orgSlug}.com`,
+      description: `A premium high-impact ${stageName.toLowerCase()} ${typeName.toLowerCase()} programme specifically tailored for high-growth ventures in the ${industryName} sector, operating in the vibrant startup hub of ${cityName}. Designed to facilitate rapid scaling, strategic partner integrations, and ecosystem synergy.`,
+      objective: `Accelerate the product-market fit journey and investment readiness of participating founders through deep domain expert mentorship, customer discovery sprints, and direct capital introductions.`,
+      eligibility_criteria: `• Dedicated full-time founding team with deep domain expertise\n• Functional prototype or MVP with early customer signals\n• Scalable technology or business model with global addressable market potential\n• Base operations or active expansion plans in ${cityName}`,
+      benefits: `• Direct access to $150,000 growth funding and grants\n• 1-on-1 strategic pairing with tier-1 venture mentors\n• Fast-track credits for AWS, GCP, OpenAI and ecosystem tools\n• Warm introductions to top-tier institutional and seed funds`,
+      application_open_date: "2026-05-17",
+      application_deadline: "2026-06-17",
+      programme_start_date: "2026-07-15",
+      programme_end_date: "2026-10-15",
+      max_participants: "25",
+      funding_amount: "150000",
+      website_url: `https://www.${orgSlug}.com/${progSlug}`,
+      application_url: `https://www.${orgSlug}.com/${progSlug}/apply`,
+      venue: `Nexus Innovation Center, ${cityName}`
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      ...mockGenerated
+    }));
+    setIsAutoFilled(true);
+    setIsGenerating(false);
   };
 
   const saveProgramme = async () => {
@@ -103,7 +110,6 @@ export default function AdminDashboard() {
       application_deadline: formData.application_deadline || null,
       programme_start_date: formData.programme_start_date || null,
       programme_end_date: formData.programme_end_date || null,
-      country: formData.country,
       city: formData.city,
       venue: formData.venue,
       max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
@@ -132,13 +138,21 @@ export default function AdminDashboard() {
     setTimeout(() => {
       setIsAutoFilled(false);
       setFormData({ 
-        name: "", type: "", industry: "", stage: "", organizer: "", country: "", city: "",
+        name: "", type: "", industry: "", stage: "", organizer: "", city: "",
         organizer_email: "", organizer_website: "", description: "", objective: "",
         eligibility_criteria: "", benefits: "", application_open_date: "", application_deadline: "",
         programme_start_date: "", programme_end_date: "", venue: "", max_participants: "",
         funding_amount: "", website_url: "", application_url: ""
       });
     }, 200);
+  };
+
+  const handleRunMatcher = () => {
+    setIsAiMatcherOpen(true);
+    setIsMatching(true);
+    setTimeout(() => {
+      setIsMatching(false);
+    }, 2000);
   };
 
   return (
@@ -151,9 +165,9 @@ export default function AdminDashboard() {
             <p className="text-xs font-mono text-muted uppercase tracking-wider mt-1">Live metrics and automated matching controls</p>
           </div>
           <div className="flex items-center gap-3 pr-[300px]">
-            <Button variant="ai" size="sm">
+            <Button variant="ai" size="sm" onClick={handleRunMatcher}>
               <Sparkles className="h-3.5 w-3.5" />
-              Run AI Analysis
+              AI Matcher
             </Button>
             <Button variant="primary" size="sm" onClick={() => setIsCreateModalOpen(true)}>
               <GraduationCap className="h-3.5 w-3.5" />
@@ -280,15 +294,7 @@ export default function AdminDashboard() {
               </div>
 
               <div className="p-6 overflow-y-auto max-h-[70vh] space-y-5">
-                <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 flex items-start gap-3">
-                  <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-primary">{isAutoFilled ? "AI Auto-Fill Complete" : "AI Auto-Fill Enabled"}</p>
-                    <p className="text-xs text-muted mt-1 leading-relaxed">
-                      {isAutoFilled ? "The AI has populated the remaining fields based on your initial inputs. Please review and edit the details before saving to the EcoSync Supabase." : "Fields left blank will be intelligently auto-generated by the AI Engine before storing to the EcoSync Supabase. This programme will be automatically linked to relevant Mentors and Startups in the ecosystem."}
-                    </p>
-                  </div>
-                </div>
+
 
                 <div className="grid gap-4">
                   <div className="space-y-2">
@@ -369,34 +375,23 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-muted uppercase tracking-wider">Country</label>
-                      <input 
-                        className={`w-full bg-background border rounded-md px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary transition-colors ${isAutoFilled && formData.country ? 'border-primary/50 bg-primary/5' : 'border-border'}`}
-                        placeholder="e.g. Singapore" 
-                        value={formData.country}
-                        onChange={(e) => setFormData({...formData, country: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-muted uppercase tracking-wider">City</label>
-                      <div className="relative">
-                        <select 
-                          className={`w-full bg-background border rounded-md px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary transition-colors appearance-none ${isAutoFilled && formData.city ? 'border-primary/50 bg-primary/5' : 'border-border'}`}
-                          value={formData.city}
-                          onChange={(e) => setFormData({...formData, city: e.target.value})}
-                        >
-                          <option value="">Select city...</option>
-                          <option>Singapore</option>
-                          <option>London</option>
-                          <option>San Francisco</option>
-                          <option>New York</option>
-                          <option>Berlin</option>
-                          <option>Tokyo</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted pointer-events-none" />
-                      </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-muted uppercase tracking-wider">City</label>
+                    <div className="relative">
+                      <select 
+                        className={`w-full bg-background border rounded-md px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary transition-colors appearance-none ${isAutoFilled && formData.city ? 'border-primary/50 bg-primary/5' : 'border-border'}`}
+                        value={formData.city}
+                        onChange={(e) => setFormData({...formData, city: e.target.value})}
+                      >
+                        <option value="">Select city...</option>
+                        <option>Singapore</option>
+                        <option>London</option>
+                        <option>San Francisco</option>
+                        <option>New York</option>
+                        <option>Berlin</option>
+                        <option>Tokyo</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted pointer-events-none" />
                     </div>
                   </div>
                   
@@ -521,6 +516,134 @@ export default function AdminDashboard() {
                   </Button>
                 )}
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* AI Matcher Modal */}
+      <AnimatePresence>
+        {isAiMatcherOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+              onClick={() => !isMatching && setIsAiMatcherOpen(false)}
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-md bg-surface border border-border rounded-xl shadow-2xl overflow-hidden flex flex-col"
+            >
+              <div className="p-6 border-b border-border bg-surface-container flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground">Ecosystem Matcher</h2>
+                    <p className="text-sm text-muted">Running AI synthesis across network</p>
+                  </div>
+                </div>
+                {!isMatching && (
+                  <button onClick={() => setIsAiMatcherOpen(false)} className="text-muted hover:text-foreground transition-colors">
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
+
+              <div className="p-6 bg-background relative min-h-[300px] flex flex-col justify-center">
+                {isMatching ? (
+                  <div className="flex flex-col items-center justify-center space-y-4 py-8">
+                    <div className="relative">
+                      <div className="h-16 w-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Sparkles className="h-6 w-6 text-primary animate-pulse" />
+                      </div>
+                    </div>
+                    <div className="space-y-1 text-center">
+                      <p className="text-sm font-medium text-foreground">Computing vector embeddings...</p>
+                      <p className="text-xs text-muted">Analyzing 1,420 mentor profiles against startup needs</p>
+                    </div>
+                  </div>
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-6"
+                  >
+                    <div className="flex items-center justify-center">
+                      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <CheckCircle2 className="h-4 w-4" />
+                        <span className="text-sm font-medium">Successful Match Found!</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-6">
+                      <div className="text-center space-y-2">
+                        <div className="w-16 h-16 rounded-full bg-surface-container border border-border flex items-center justify-center mx-auto overflow-hidden">
+                          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=James" alt="Mentor" className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-foreground">James Wilson</p>
+                          <p className="text-xs text-muted">Mentor</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex-1 flex items-center justify-center">
+                        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-primary/50 to-transparent relative">
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2">
+                            <Activity className="h-4 w-4 text-primary" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-center space-y-2">
+                        <div className="w-16 h-16 rounded-full bg-surface-container border border-border flex items-center justify-center mx-auto overflow-hidden p-3">
+                           <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 rounded-md shadow-inner" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-foreground">NovaTech AI</p>
+                          <p className="text-xs text-muted">Startup</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-surface-container/50 border border-border rounded-lg p-4 space-y-3">
+                      <p className="text-xs font-bold text-muted uppercase tracking-wider mb-2">Match Synergy Points</p>
+                      <ul className="space-y-3">
+                        <li className="flex items-start gap-2 text-sm text-foreground/80">
+                          <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>Shared domain: <strong className="text-foreground">FinTech + AI</strong></span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm text-foreground/80">
+                          <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>Mentor previously advised similar startup with <strong className="text-emerald-400">+32% growth</strong></span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm text-foreground/80">
+                          <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>Startup stage aligns with mentor expertise</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm text-foreground/80">
+                          <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>High semantic similarity score: <strong className="text-primary">0.91</strong></span>
+                        </li>
+                      </ul>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+              
+              {!isMatching && (
+                <div className="p-4 border-t border-border bg-surface-container flex justify-end gap-3">
+                  <Button variant="ghost" onClick={() => setIsAiMatcherOpen(false)}>Dismiss</Button>
+                  <Button variant="primary" onClick={() => { setIsAiMatcherOpen(false); alert("Match recommendation approved and sent to participants."); }}>
+                    Approve Match
+                  </Button>
+                </div>
+              )}
             </motion.div>
           </div>
         )}
